@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  db:
+    # We use a mariadb image which supports both amd64 & arm64 architecture
+    # image: mariadb:10.6.4-focal
+    # If you really want to use MySQL, uncomment the following line
+    image: mysql:8.0
+    command: '--default-authentication-plugin=mysql_native_password'
+    volumes:
+      - ./dbdata:/var/lib/mysql
+      # - ./data/data-dump.sql:/docker-entrypoint-initdb.d/data-dump.sql if import data
+    restart: always
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
+      - MYSQL_DATABASE=$WORDPRESS_DB_NAME
+      - MYSQL_USER=$WORDPRESS_DB_USER
+      - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
+    ports:
+      - 3306:3306
+    networks:
+      - wp-network
+
+  wordpress:
+    image: wordpress:latest
+    depends_on:
+      - db
+    ports:
+      - 80:80
+    restart: always
+    env_file: .env
+    environment:
+      - WORDPRESS_DB_HOST=db
+      - WORDPRESS_DB_USER=$WORDPRESS_DB_USER
+      - WORDPRESS_DB_PASSWORD=$WORDPRESS_DB_PASSWORD
+      - WORDPRESS_DB_NAME=$WORDPRESS_DB_NAME
+    volumes:
+      - ./resource:/var/www/html
+    networks:
+      - wp-network
+
+# volumes:
+#   db_data:
+#   wordpress:
+  
+networks:
+  wp-network:
+    driver: bridge
