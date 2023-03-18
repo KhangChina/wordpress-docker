@@ -2,7 +2,7 @@
 > Môi trường cài đặt wordpress
 
 
-One to two paragraph statement about your product and what it does.
+Thiết kế hệ thống website - mariadb - php 8.0 - nginx - wordpress images
 
 ![](https://i0.wp.com/wordpress.org/files/2023/03/swag-bulk-org.png?resize=768%2C636&ssl=1)
 
