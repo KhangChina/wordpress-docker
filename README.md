@@ -1,7 +1,6 @@
 # Wordpress Environment
 > Môi trường cài đặt wordpress
 
-[![Build Status][travis-image]][travis-url]
 
 One to two paragraph statement about your product and what it does.
 
