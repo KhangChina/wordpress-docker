@@ -6,7 +6,7 @@ services:
     volumes:
       - ./dbdata:/var/lib/mysql
       - ./config/db:/etc/mysql/conf.d
-      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+      - ./config/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: always
     env_file: .env
     environment:
