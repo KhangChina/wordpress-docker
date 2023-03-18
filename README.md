@@ -33,5 +33,5 @@ docker-compose up
 * Images
     * phpMyAdmin
 
--------------------------------------------- Khang Design Resource :)----------------------------
+------------------------------------- Khang Design Resource ❤️❤️
 
