@@ -2,27 +2,39 @@ version: '3.8'
 
 services:
   db:
-    # We use a mariadb image which supports both amd64 & arm64 architecture
-    # image: mariadb:10.6.4-focal
-    # If you really want to use MySQL, uncomment the following line
-    image: mysql:8.0
-    command: '--default-authentication-plugin=mysql_native_password'
+    image: mariadb:10.9
     volumes:
       - ./dbdata:/var/lib/mysql
       - ./config/db:/etc/mysql/conf.d
-      # - ./data/data-dump.sql:/docker-entrypoint-initdb.d/data-dump.sql if import data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
     restart: always
     env_file: .env
     environment:
-      - MYSQL_ROOT_HOST=%
-      - MYSQL_ROOT_PASSWORD=$MYSQL_ROOT_PASSWORD
-      - MYSQL_DATABASE=$WORDPRESS_DB_NAME
-      - MYSQL_USER=$WORDPRESS_DB_USER
-      - MYSQL_PASSWORD=$WORDPRESS_DB_PASSWORD
+      - TZ=Asia/Ho_Chi_Minh
+      - MARIADB_ROOT_HOST=%
+      - MARIADB_ROOT_PASSWORD=$MARIADB_ROOT_PASSWORD
+      - MARIADB_DATABASE=$WORDPRESS_DB_NAME
+      - MARIADB_USER=$WORDPRESS_DB_USER
+      - MARIADB_PASSWORD=$WORDPRESS_DB_PASSWORD
     ports:
       - 3306:3306
     networks:
       - wp-network
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=$MARIADB_ROOT_PASSWORD
+      - UPLOAD_LIMIT=300M
+    depends_on:
+      - db
+    networks:
+      - wp-network
+    ports:
+      - '20080:80'
 
   wordpress:
     image: wordpress:php8.0-fpm-alpine
@@ -33,12 +45,13 @@ services:
     restart: always
     env_file: .env
     environment:
+      - TZ=Asia/Ho_Chi_Minh
       - WORDPRESS_DB_HOST=db
       - WORDPRESS_DB_USER=$WORDPRESS_DB_USER
       - WORDPRESS_DB_PASSWORD=$WORDPRESS_DB_PASSWORD
       - WORDPRESS_DB_NAME=$WORDPRESS_DB_NAME
     volumes:
-      - ./resource:/var/www/html
+      - wordpress_resource:/var/www/html
       - ./config/php.ini:/usr/local/etc/php/php.ini
     networks:
       - wp-network
@@ -51,18 +64,17 @@ services:
       - 80:80
       - 443:443
     volumes:
-      - ./resource:/var/www/html
+      - wordpress_resource:/var/www/html
       - ./config/nginx.conf:/etc/nginx/conf.d/default.conf
-      # - ./config/certs:/etc/nginx/certs
+      - ./config/certs:/etc/nginx/certs
     restart: always
     networks:
-      wp-network:
-        aliases:
-          - wp-network.localhost
-# volumes:
-#   db_data:
-#   wordpress:
-  
+      - wp-network
+
+volumes:
+  wordpress_resource: #/resource
+
+# Define toolbox network
 networks:
   wp-network:
     driver: bridge
